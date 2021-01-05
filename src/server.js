@@ -13,7 +13,7 @@ const {
   serviceUnavailableRequestHandler,
   gatewayTimeoutRequestHandler,
 } = require("./errorHandlers");
-
+console.log(process.env.REFRESH_JWT_SECRET);
 server.use(express.json());
 server.use(cors());
 server.use(badRequestHandler);
