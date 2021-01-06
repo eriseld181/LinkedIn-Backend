@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 const port = process.env.PORT;
 const server = express();
 const {
@@ -15,6 +16,7 @@ const {
 } = require("./errorHandlers");
 
 server.use(express.json());
+server.use(cookieParser());
 server.use(cors());
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
