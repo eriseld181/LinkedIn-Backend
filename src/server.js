@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT;
 const server = express();
+const expRouter = require("./routes/experiences");
+
 const {
   badRequestHandler,
   unauthorizedRequestHandler,
@@ -18,6 +20,8 @@ const {
 server.use(express.json());
 server.use(cookieParser());
 server.use(cors());
+server.use("/exp", expRouter);
+//ERROR HANDLERS
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
 server.use(forbiddenRequestHandler);
