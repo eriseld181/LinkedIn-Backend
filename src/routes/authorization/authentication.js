@@ -1,33 +1,34 @@
 const jwt = require("jsonwebtoken");
 const profileSchema = require("../profile/schema");
 
-// const refreshToken1 = async (oldRefreshToken) => {
-//     const decoded = await verifyRefreshToken(oldRefreshToken)
-//     const user = await User.findOne({ _id: decoded._id })
+const refreshToken1 = async (oldRefreshToken) => {
+  const decoded = await verifyRefreshToken(oldRefreshToken);
+  const user = await User.findOne({ _id: decoded._id });
 
-//     if (!user)
-//         throw new Error("Access is forbidden, token is invalid or expired!")
+  if (!user)
+    throw new Error("Access is forbidden, token is invalid or expired!");
 
-//     const currentRefreshToken = user.refreshTokens.find(
-//         (token) => token.token === oldRefreshToken)
+  const currentRefreshToken = user.refreshTokens.find(
+    (token) => token.token === oldRefreshToken
+  );
 
-//     if (!currentRefreshToken) {
-//         throw new error("refresh token is not available!")
-//     }
+  if (!currentRefreshToken) {
+    throw new error("refresh token is not available!");
+  }
 
-//     //generate tokens
-//     const newAccessToken = await generateJWT({ _id: user._id })
-//     const newRefreshToken = await generateRefreshJWT({ _id: user._id })
+  //generate tokens
+  const newAccessToken = await generateJWT({ _id: user._id });
+  const newRefreshToken = await generateRefreshJWT({ _id: user._id });
 
-//     //save them in storage
-//     const newRefreshTokens = user.refreshTokens
-//         .filter((token) => token.token !== oldRefreshToken)
-//         .concat({ token: newRefreshToken })
+  //save them in storage
+  const newRefreshTokens = user.refreshTokens
+    .filter((token) => token.token !== oldRefreshToken)
+    .concat({ token: newRefreshToken });
 
-//     user.refreshTokens = [...newRefreshTokens]
-//     await user.save()
-//     return { token: newAccessToken, refreshToken: newRefreshToken }
-// }
+  user.refreshTokens = [...newRefreshTokens];
+  await user.save();
+  return { token: newAccessToken, refreshToken: newRefreshToken };
+};
 //I create this function to pass the user in here, it takes the _id to generate the token
 const authenticate = async (user) => {
   try {

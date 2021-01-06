@@ -1,5 +1,7 @@
 const { Schema } = require("mongoose");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const myValidator = require("validator");
 
 const profileSchema = new Schema(
   {
@@ -11,10 +13,22 @@ const profileSchema = new Schema(
       type: String,
       required: true,
     },
+
     email: {
       type: String,
       required: true,
+      lowercase: true,
+      unique: true,
+      validate: {
+        validator: async (value) => {
+          if (!myValidator.isEmail(value))
+            throw new Error(
+              "This email is already used or is invalid, please enter a valid email"
+            );
+        },
+      },
     },
+
     bio: {
       type: String,
       required: true,
@@ -45,20 +59,31 @@ const profileSchema = new Schema(
     timestamps: true,
   }
 );
+profileSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+  delete userObject.password;
+  delete userObject.__v;
+  return userObject;
+};
+profileSchema.statics.findByCredentials = async (email, password) => {
+  const user = await UserModel.findOne({ email });
 
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    const error = new Error("Unable to login, please try again!");
+    error.httpStatusCode = 401;
+    throw error;
+  }
+  return user;
+};
+profileSchema.pre("save", async function (next) {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
+});
 const UserModel = mongoose.model("profile", profileSchema);
 module.exports = UserModel;
-
-// {
-//     "_id": "5d84937322b7b54d848eb41b", //server generated
-//     "name": "Diego",
-//     "surname": "Banovaz",
-//     "email": "diego@strive.school",
-//     "bio": "SW ENG",
-//     "title": "COO @ Strive School",
-//     "area": "Berlin",
-//     "image": ..., //server generated on upload, set a default here
-//     "username": "admin",
-//     "createdAt": "2019-09-20T08:53:07.094Z", //server generated
-//     "updatedAt": "2019-09-20T09:00:46.977Z", //server generated
-// }
