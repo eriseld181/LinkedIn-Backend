@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const port = process.env.PORT;
 const userProfile = require("./routes/profile");
 const server = express();
+const expRouter = require("./routes/experiences");
+
 const {
   badRequestHandler,
   unauthorizedRequestHandler,
@@ -19,7 +21,9 @@ const {
 server.use(express.json());
 server.use(cookieParser());
 server.use(cors());
-
+server.use("/profile", userProfile);
+server.use("/exp", expRouter);
+//ERROR HANDLERS
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
 server.use(forbiddenRequestHandler);
@@ -28,8 +32,6 @@ server.use(internalServerErrorRequestHandler);
 server.use(badGatewayRequestHandler);
 server.use(serviceUnavailableRequestHandler);
 server.use(gatewayTimeoutRequestHandler);
-
-server.use("/profile", userProfile);
 
 //connecting server with mongodb
 mongoose
