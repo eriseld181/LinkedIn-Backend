@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT;
+const userProfile = require("./routes/profile");
 const server = express();
 const {
   badRequestHandler,
@@ -18,6 +19,7 @@ const {
 server.use(express.json());
 server.use(cookieParser());
 server.use(cors());
+
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
 server.use(forbiddenRequestHandler);
@@ -26,6 +28,8 @@ server.use(internalServerErrorRequestHandler);
 server.use(badGatewayRequestHandler);
 server.use(serviceUnavailableRequestHandler);
 server.use(gatewayTimeoutRequestHandler);
+
+server.use("/profile", userProfile);
 
 //connecting server with mongodb
 mongoose
