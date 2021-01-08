@@ -9,6 +9,17 @@ const {
   authorize,
   adminOnlyMiddleware,
 } = require("../authorization/authorization");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+
+const upload = multer({});
+
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret,
+});
 
 userRouter.get("/allProfiles", authorize, async (req, res, next) => {
   try {
@@ -38,6 +49,39 @@ userRouter.get("/profile/:_id", authorize, async (req, res, next) => {
     next(err);
   }
 });
+
+userRouter.post(
+  "/uploadImage",
+  authorize,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (req.file) {
+        const uploadImage = cloudinary.uploader.upload_stream(
+          {
+            folder: "linkedinProfile",
+          },
+          async (err, data) => {
+            if (!err) {
+              req.user.image = data.secure_url;
+              await req.user.save({ validateBeforeSave: false });
+              res.status(201).json(req.user.image);
+            }
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadImage);
+      } else {
+        const error = new Error();
+        error.httpStatusCode = 404;
+        error.message = "image is missing";
+        next(error);
+      }
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  }
+);
 
 userRouter.put("/editProfile", authorize, async (req, res, next) => {
   try {
