@@ -38,6 +38,8 @@ mongoose
   .connect(process.env.MongoURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    //I put this line to remove the warning, if it cause any problem, we should remove that.
+    useCreateIndex: true,
   })
   .then(
     server.listen(port || 3009, () => {
