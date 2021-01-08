@@ -38,9 +38,9 @@ userRouter.get("/allProfiles", authorize, async (req, res, next) => {
 userRouter.get("/profile/:_id", authorize, async (req, res, next) => {
   try {
     const id = req.params._id;
-    const singelProfile = await userSchema.findById({ _id: id });
-    if (singelProfile) {
-      res.send(singelProfile);
+    const singleProfile = await userSchema.findById({ _id: id });
+    if (singleProfile) {
+      res.send(singleProfile);
     } else {
       res.send("Profile not exist");
     }

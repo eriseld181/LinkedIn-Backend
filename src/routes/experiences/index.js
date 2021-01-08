@@ -4,7 +4,8 @@ const {
   authorize,
   adminOnlyMiddleware,
 } = require("../authorization/authorization");
-
+const multer = require("multer");
+const upload = multer({});
 const expRouter = express.Router();
 expRouter.get("/", authorize, async (req, res, next) => {
   try {
@@ -32,6 +33,39 @@ expRouter.get("/:id", authorize, async (req, res, next) => {
     next("While reading experiences list a problem occurred!");
   }
 });
+
+expRouter.post(
+  "/uploadImage",
+  authorize,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (req.file) {
+        const uploadImage = cloudinary.uploader.upload_stream(
+          {
+            folder: "linkedinProfile",
+          },
+          async (err, data) => {
+            if (!err) {
+              req.user.image = data.secure_url;
+              await req.user.save({ validateBeforeSave: false });
+              res.status(201).json(req.user.image);
+            }
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadImage);
+      } else {
+        const error = new Error();
+        error.httpStatusCode = 404;
+        error.message = "image is missing";
+        next(error);
+      }
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  }
+);
 
 expRouter.post("/", async (req, res, next) => {
   try {
