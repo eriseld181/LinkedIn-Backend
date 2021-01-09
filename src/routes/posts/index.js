@@ -3,11 +3,10 @@ const postSchema = require("./schema");
 const multer = require("multer");
 const upload = multer({});
 const path = require("path");
-const fs = require("fs-extra");
 
 const q2m = require("query-to-mongo");
 const userPosts = express.Router();
-const imagePath = path.join(__dirname, "../../../public/image/post");
+
 const {
   authorize,
   adminOnlyMiddleware,
