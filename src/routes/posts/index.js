@@ -23,7 +23,7 @@ userPosts.get("/", authorize, async (req, res, next) => {
       .sort(query.options.sort);
     res.send(posts);
   } catch (error) {
-    next(err);
+    next(error);
   }
 });
 
@@ -32,7 +32,7 @@ userPosts.get("/:username", authorize, async (req, res, next) => {
     const myPosts = await postSchema.find(req.params.username).populate("user");
     res.send(myPosts);
   } catch (error) {
-    next(err);
+    next(error);
   }
 });
 
@@ -42,7 +42,14 @@ userPosts.post("/", authorize, async (req, res, next) => {
     await newPost.save();
     res.send("Post was published!");
   } catch (error) {
-    next(err);
+    next(error);
+  }
+});
+userPosts.put("/:userId", authorize, async (req, res, next) => {
+  try {
+      const myPost = 
+  } catch (error) {
+    next(error);
   }
 });
 
