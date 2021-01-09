@@ -41,6 +41,10 @@ const profileSchema = new Schema(
       type: String,
       required: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     image: {
       type: String,
     },
@@ -49,7 +53,7 @@ const profileSchema = new Schema(
       required: true,
       validate: {
         validator: async (value) => {
-          const checkUsername = await ProfileModel.findOne({ username: value });
+          const checkUsername = await UserModel.findOne({ username: value });
           if (checkUsername) {
             throw new Error("Username already exists!");
           }
@@ -77,9 +81,8 @@ profileSchema.methods.toJSON = function () {
 };
 profileSchema.statics.findByCredentials = async (email, password) => {
   const user = await UserModel.findOne({ email });
-
   const isMatch = await bcrypt.compare(password, user.password);
-
+  console.log("test1", isMatch);
   if (!isMatch) {
     const error = new Error("Unable to login, please try again!");
     error.httpStatusCode = 401;

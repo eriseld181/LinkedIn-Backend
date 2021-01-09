@@ -62,7 +62,7 @@ userRouter.get("/:_id/pdf", authorize, async (req, res, next) => {
       "Content-Disposition",
       `attachment; filename=${user.name}.pdf`
     );
-    if (url.length > 0) {
+    if (url && url.length > 0) {
       const imageProfile = await axios.get(url, {
         responseType: "arraybuffer",
       });
@@ -71,10 +71,10 @@ userRouter.get("/:_id/pdf", authorize, async (req, res, next) => {
         fit: [100, 100],
       });
     }
-    doc.font("Helventica-Bold");
+    doc.font("Helvetica-Bold");
     doc.fontSize(20);
 
-    doc.text(`${profile.name} ${profile.surname}`, 100, 140, {
+    doc.text(`${user.name} ${user.surname}`, 100, 140, {
       width: 410,
       align: "center",
     });
@@ -82,9 +82,9 @@ userRouter.get("/:_id/pdf", authorize, async (req, res, next) => {
     doc.font("Helvetica");
     doc.text(
       `
-  ${profile.title}
-  ${profile.area}
-  ${profile.email}`,
+  ${user.title}
+  ${user.area}
+  ${user.email}`,
       360,
       180,
       {
@@ -202,7 +202,9 @@ userRouter.delete("deleteAccount", authorize, async (req, res, next) => {
 userRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
     const user = await userSchema.findByCredentials(email, password);
+    console.log("this is user", user);
     const token = await authenticate(user);
     res.cookie("accessToken", token.token, {
       secure: true,

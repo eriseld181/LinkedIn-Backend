@@ -38,7 +38,7 @@ const authenticate = async (user) => {
 
     const newUser = await profileSchema.findById(user._id);
     newUser.refreshTokens.push({ token: newRefreshToken });
-    await newUser.save();
+    await newUser.save({ validateBeforeSave: false });
     return { token: newAccessToken, refreshToken: newRefreshToken };
   } catch (error) {
     console.log(error);
