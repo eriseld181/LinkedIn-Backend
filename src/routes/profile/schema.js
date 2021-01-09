@@ -46,6 +46,15 @@ const profileSchema = new Schema(
     },
     username: {
       type: String,
+      required: true,
+      validate: {
+        validator: async (value) => {
+          const checkUsername = await ProfileModel.findOne({ username: value });
+          if (checkUsername) {
+            throw new Error("Username already exists!");
+          }
+        },
+      },
     },
     refreshTokens: [
       {

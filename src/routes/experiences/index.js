@@ -1,5 +1,6 @@
 const express = require("express");
 const expSchema = require("./expSchema");
+const profileSchema = require("../profile/schema");
 const {
   authorize,
   adminOnlyMiddleware,
@@ -9,7 +10,7 @@ const upload = multer({});
 const expRouter = express.Router();
 expRouter.get("/", authorize, async (req, res, next) => {
   try {
-    const experiences = await expSchema.find(req.query);
+    const experiences = await expSchema.find({ username: req.user.username });
     res.send(experiences);
   } catch (error) {
     next(error);
@@ -67,10 +68,13 @@ expRouter.post(
   }
 );
 
-expRouter.post("/", async (req, res, next) => {
+expRouter.post("/", authorize, async (req, res, next) => {
   try {
-    const newExp = new expSchema(req.body);
+    const newExp = new expSchema(...req.body);
+    newExp.username = req.user.username;
     const { _id } = await newExp.save();
+
+    await profile.save({ validateBeforeSave: false });
 
     res.status(201).send(_id);
   } catch (error) {
@@ -78,7 +82,7 @@ expRouter.post("/", async (req, res, next) => {
   }
 });
 
-expRouter.put("/:id", async (req, res, next) => {
+expRouter.put("/:id", authorize, async (req, res, next) => {
   try {
     const experiences = await expSchema.findByIdAndUpdate(
       req.params.id,
@@ -96,7 +100,7 @@ expRouter.put("/:id", async (req, res, next) => {
   }
 });
 
-expRouter.delete("/:id", async (req, res, next) => {
+expRouter.delete("/:id", authorize, async (req, res, next) => {
   try {
     const experiences = await expSchema.findByIdAndDelete(req.params.id);
     if (experiences) {

@@ -12,7 +12,9 @@ const {
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
-
+const experiences = require("../experiences/expSchema");
+const pdfCreate = require("pdfkit");
+const axios = require("axios");
 const upload = multer({});
 
 cloudinary.config({
@@ -44,6 +46,85 @@ userRouter.get("/profile/:_id", authorize, async (req, res, next) => {
     } else {
       res.send("Profile not exist");
     }
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
+userRouter.get("/:_id/pdf", authorize, async (req, res, next) => {
+  try {
+    const user = await userSchema.findById({ _id: req.params._id });
+    const experienc = await experiences.find({ username: user.username });
+    const doc = new pdfCreate();
+    const url = user.image;
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${user.name}.pdf`
+    );
+    if (url.length > 0) {
+      const imageProfile = await axios.get(url, {
+        responseType: "arraybuffer",
+      });
+      const image = new Buffer(imageProfile.data, "base64");
+      doc.image(image, 100, 50, {
+        fit: [100, 100],
+      });
+    }
+    doc.font("Helventica-Bold");
+    doc.fontSize(20);
+
+    doc.text(`${profile.name} ${profile.surname}`, 100, 140, {
+      width: 410,
+      align: "center",
+    });
+    doc.fontSize(12);
+    doc.font("Helvetica");
+    doc.text(
+      `
+  ${profile.title}
+  ${profile.area}
+  ${profile.email}`,
+      360,
+      180,
+      {
+        align: "left",
+      }
+    );
+    doc.fontSize(18);
+    doc.text("Experiences", 100, 270, {
+      width: 410,
+      align: "center",
+    });
+    doc.fontSize(12);
+    const start = async () => {
+      experienc.forEach(
+        async (exp) =>
+          doc.text(`
+        Role: ${exp.role}
+        Company: ${exp.company}
+        Starting Date: ${exp.startDate.toString().slice(4, 15)}
+        Description: ${exp.description}
+        Area:  ${exp.area}
+        -------------------------------------------------------
+      `),
+        {
+          width: 410,
+          align: "center",
+        }
+      );
+    };
+    await start();
+
+    let grad = doc.linearGradient(50, 0, 350, 100);
+    grad.stop(0, "#0077B5").stop(1, "#004451");
+
+    doc.rect(0, 0, 70, 1000);
+    doc.fill(grad);
+
+    doc.pipe(res);
+
+    doc.end();
   } catch (err) {
     console.log(err);
     next(err);
