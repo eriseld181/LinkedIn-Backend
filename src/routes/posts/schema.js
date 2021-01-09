@@ -20,13 +20,22 @@ const post = new Schema(
       type: String,
       //put a default here
     },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "comments",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 post.static("addProfile", async function (id) {
-  const profile = await PostsModel.findOne({ _id: id }).populate("user");
+  const profile = await PostsModel.findOne({ _id: id }).populate(
+    "user",
+    "comments"
+  );
   return profile;
 });
 

@@ -7,6 +7,7 @@ const userProfile = require("./routes/profile");
 const userPosts = require("./routes/posts");
 const server = express();
 const expRouter = require("./routes/experiences");
+const comments = require("./routes/comments");
 
 const {
   badRequestHandler,
@@ -25,6 +26,7 @@ server.use(cors());
 server.use("/profile", userProfile);
 server.use("/exp", expRouter);
 server.use("/posts", userPosts);
+server.use("/comments", comments);
 //ERROR HANDLERS
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
