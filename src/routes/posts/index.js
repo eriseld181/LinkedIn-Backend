@@ -1,9 +1,10 @@
 const express = require("express");
 const postSchema = require("./schema");
+const multer = require("multer");
+const upload = multer({});
 const path = require("path");
 const fs = require("fs-extra");
-const multer = require("multer");
-const upload = multer();
+
 const q2m = require("query-to-mongo");
 const userPosts = express.Router();
 const imagePath = path.join(__dirname, "../../../public/image/post");
@@ -47,10 +48,65 @@ userPosts.post("/", authorize, async (req, res, next) => {
 });
 userPosts.put("/:userId", authorize, async (req, res, next) => {
   try {
-      const myPost = 
+    const myPost = await postSchema.findByIdAndUpdate(
+      { _id: req.params.userId },
+      req.body
+    );
+    if (myPost) {
+      res.send("Posts was edited succesfully!");
+    } else {
+      res.send("Post was not updated!");
+    }
   } catch (error) {
     next(error);
   }
 });
+userPosts.delete("/:userId", authorize, async (req, res, next) => {
+  try {
+    const myPost = await postSchema.findByIdAndDelete({
+      _id: req.params.userId,
+    });
+    if (myPost) {
+      res.send("The post was succesully deleted!");
+    } else {
+      res.send("The post you are trying to delete, is no longer available");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+userPosts.post(
+  "/uploadImage",
+  authorize,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (req.file) {
+        const uploadImage = cloudinary.uploader.upload_stream(
+          {
+            folder: "linkedinProfile",
+          },
+          async (err, data) => {
+            if (!err) {
+              req.user.image = data.secure_url;
+              await req.user.save({ validateBeforeSave: false });
+              res.status(201).json(req.user.image);
+            }
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadImage);
+      } else {
+        const error = new Error();
+        error.httpStatusCode = 404;
+        error.message = "image is missing";
+        next(error);
+      }
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  }
+);
 
 module.exports = userPosts;
