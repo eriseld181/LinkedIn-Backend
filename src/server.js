@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT;
 const userProfile = require("./routes/profile");
+const userPosts = require("./routes/posts");
 const server = express();
 const expRouter = require("./routes/experiences");
 
@@ -23,6 +24,7 @@ server.use(cookieParser());
 server.use(cors());
 server.use("/profile", userProfile);
 server.use("/exp", expRouter);
+server.use("/posts", userPosts);
 //ERROR HANDLERS
 server.use(badRequestHandler);
 server.use(unauthorizedRequestHandler);
