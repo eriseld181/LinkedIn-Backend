@@ -8,7 +8,9 @@ const userPosts = require("./routes/posts");
 const server = express();
 const expRouter = require("./routes/experiences");
 const comments = require("./routes/comments");
-
+const socket = require("./routes/chat/util/utils");
+const http = require("http");
+const app = http.createServer(server);
 const {
   badRequestHandler,
   unauthorizedRequestHandler,
@@ -19,7 +21,7 @@ const {
   serviceUnavailableRequestHandler,
   gatewayTimeoutRequestHandler,
 } = require("./errorHandlers");
-
+socket(app);
 server.use(express.json());
 server.use(cookieParser());
 server.use(cors());

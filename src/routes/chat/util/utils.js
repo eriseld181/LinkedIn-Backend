@@ -9,7 +9,7 @@ const createChat = (app) => {
   io.on("connection", (socket) => {
     socket.on("newUser", async ({ username }) => {
       const user = await newUser(username, socket.id);
-      const newIn = user.map((x) => x.username === username);
+      const newIn = user.map((x) => x.username);
       io.emit("online", newIn);
     });
     socket.on("sendMessage", async (message) => {
@@ -31,5 +31,16 @@ const createChat = (app) => {
         message: save.message,
       });
     });
+
+    socket.on("disconnect", async () => {
+      await removeUser(socket.id);
+
+      const getAll = await getUser();
+      const findAll = getAll.map((x) => x.username);
+
+      io.emit("online", findAll);
+    });
   });
 };
+
+module.exports = createChat;

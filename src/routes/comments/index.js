@@ -4,7 +4,7 @@ const { authorize } = require("../authorization/authorization");
 const comentRoute = express.Router();
 const postSchema = require("../posts/schema");
 
-comentsSchema.get("/:_id", authorize, async (req, res, next) => {
+comentRoute.get("/:_id", authorize, async (req, res, next) => {
   try {
     const data = await comentsSchema.findById({ _id: req.params._id });
     if (data) {
